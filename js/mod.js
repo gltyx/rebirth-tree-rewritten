@@ -12,8 +12,8 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.8",
-	name: "Rebirth 11",
+	num: "1.9",
+	name: "Rebirth 12",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
@@ -67,7 +67,7 @@ function getPointGen() {
 		return new Decimal(0)
 
   //addition
-	let gain = new Decimal(1)
+	let gain = new Decimal(0)
   if(hasMilestone("p",0)) gain = gain.add(1)
   if(hasMilestone("p",1) && !hasUpgrade("u",12)) gain = gain.add(milestoneEffect("p",1))
   if(hasMilestone("p",2)) gain = gain.add(milestoneEffect("p",2))
@@ -96,15 +96,21 @@ function getPointGen() {
   if (hasMilestone("m",7)) pow = pow.add(0.1)
   if(player.e.buyables[22]) pow = pow.add((player.e.buyables[22]/10))
   if (hasMilestone("m",9)) pow = pow.add(milestoneEffect("m",9))
-  pow = pow.add(player.mr.buyables[12].mul(0.1))
+
+  if(hasUpgrade("mr",11)) pow = pow.add(0.1)
+  if(hasUpgrade("mr",21)) pow = pow.add(0.1)
+  if(hasUpgrade("mr",31)) pow = pow.add(0.1)
+
   pow = pow.add(new Decimal(player.mr.challenges[21]).mul(0.1))
   
   gain = gain.pow(pow);
   if(player.c.sacrifices[0] > 0) gain = gain.pow(0.75 ** player.c.sacrifices[0])
+
+  if(hasUpgrade("mr",23)) gain = gain.mul(100)
   //misc
   gain = gain.mul(layers.a.achBoost())
   gain = gain.mul(new Decimal(50).pow(getBuyableAmount("mr",21)))
-  gain = gain.add(new Decimal(100).pow(getBuyableAmount("mr",11)))
+  gain = gain.add(new Decimal(100).pow(getBuyableAmount("mr",11)).sub(1))
   
   if(gain.gte(1e1000)) gain = gain.div(1e1000).log(2).mul(1e1000)
 	return gain
@@ -116,11 +122,12 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
+  "Endgame: e25,865 points"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("e280000000"))
+	return player.points.gte(new Decimal("e25865"))
 }
 
 
@@ -141,5 +148,5 @@ function maxTickLength() {
 // you can cap their current resources with this.
 function fixOldSave(oldVersion){
   if(oldVersion === "v1.6" && player.c.max > 2) player.c.max = 2
-  console.log("old save:" + oldVersion)
+  console.log("old version: " + oldVersion)
 }

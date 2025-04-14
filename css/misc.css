@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=B612+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 /* Prestige button */
 .reset {
@@ -29,15 +30,15 @@
 .tooltip { 
   pointer-events: none;
   text-align: center;
-  width: 150px;
-  font-size: 16px;
+  width: 200px;
+  font-size: 14px;
   line-height: 1.2;
   bottom: 100%;
   left: 50%;
   margin-bottom: 5px;
   transform: translateX(-50%);
   padding: 7px;
-  font-family: "Lucida Console", "Courier New", monospace;
+  font-family: "B612 Mono","Lucida Console", "Courier New", monospace;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;

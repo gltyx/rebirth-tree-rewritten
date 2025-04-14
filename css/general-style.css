@@ -10,6 +10,10 @@ body {
 	background: var(--background)
 }
 
+strong {
+	font-weight: 700
+}
+
 /* General text */
 h1, h2, h3, b, input {
 	display: inline;
@@ -40,3 +44,4 @@ h1, h2, h3, b, input {
 	color: var(--points);
 	text-shadow: 0 0 10px var(--points);
 }
+ 
