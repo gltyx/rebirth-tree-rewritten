@@ -539,7 +539,7 @@ addLayer("b", {
         
         if(hasUpgrade("c",71)) points = points.mul(1.5)
         if(player.c.sacrifices[2] > 0) points = points.div(2 ** player.c.sacrifices[2])
-        if(player.b.points.gte(1)) points = points.add(0.5)
+        if(player.b.points.gt(0)) points = points.add(0.5)
         
         let power = new Decimal(2.1).add(player.b.points.add(1).log(2).div(20))
         if(hasUpgrade("c",142)) power = new Decimal(3).add(player.b.points.add(1).log(log)).pow(1.05)
