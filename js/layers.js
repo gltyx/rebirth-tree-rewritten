@@ -752,7 +752,7 @@ addLayer("c", {
   },
   
   passiveGeneration(){
-    if(!this.canReset()) return 0
+    if(!this.canReset() || this.getResetGain().eq("NaN")) return 0
     gain = 0;
     if(hasMilestone("mr",1)) gain += 0.05
     if(hasUpgrade("c",81)) gain *= (challengeCompletions("mr",11)*0.5)+1

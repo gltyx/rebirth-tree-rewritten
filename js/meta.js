@@ -835,11 +835,17 @@ addLayer("sa", {
       name: "You did it!",
       done() {return player.points.gte("e25865")},
 
-      goalTooltip(){return "???"},
+      goalTooltip(){return "You can get this one with normal progression, don't worry!"},
       doneTooltip: "Beat the game.",
     },
+    14: {
+      name: "Torn Apart",
+      done() {return hasAchievement("sa",13) && player.timePlayed <= 3600*18}, //I use hasAchievement("sa",13) so I only have to change one boolean instead of two.
+
+      goalTooltip(){return (player.timePlayed > 3600*18) ? "Do something ridiciously fast.. is this even possible?<br>This achievement is no longer obtainable<br>Tip: I would not recommend using offline progress with this" : "Do something ridiciously fast.. is this even possible?<br>Tip: I would not recommend using offline progress with this"},
+      doneTooltip: "Beat the game in under 18 hours.",
+    },
   },
-  achBoost(){return new Decimal(1.065).pow(player.a.achievements.length)},
   tabFormat: [
     ["display-text",
         function() {return `These secret achievements don't have any effects, but are cool to get<br>Hovering over them might give a hint on what they are`}],
