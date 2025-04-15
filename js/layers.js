@@ -560,7 +560,7 @@ addLayer("b", {
         let power = player.b.points.add(1).log(200).add(1).mul(2.1)
         if(hasUpgrade("c",142)) power = power.pow(1.25)
 
-        return points.log(1.9).pow(power).add(1)
+        return points.log(1.9).pow(power).add(1).max(1)
       },
       fullDisplay(){return "<strong>Row 3 Booster<strong><br>" + format(this.effect()) + "x more of all row 3 currencies<br> Toggle with '2'"},
       onPurchase(){if(!hasUpgrade("c",122)) player.b.upgrades = [13]},

@@ -802,8 +802,8 @@ addLayer("a", {
     },
     96: {
       name: "I dont need any of those",
-      done() {return player.mr.challenges[21] >= 5},
-      tooltip: "Beat Sacrifice Replacement 5 times"
+      done() {return player.mr.challenges[21] >= 3},
+      tooltip: "Beat Feature Disablation three times"
     },
     97: {
       name: "New rebirth!",
