@@ -752,7 +752,7 @@ addLayer("c", {
   },
   
   passiveGeneration(){
-    if(!this.canReset() || this.getResetGain().eq("NaN")) return 0
+    if(!this.canReset() || this.getResetGain().isNan()) return 0
     gain = 0;
     if(hasMilestone("mr",1)) gain += 0.05
     if(hasUpgrade("c",81)) gain *= (challengeCompletions("mr",11)*0.5)+1
@@ -864,7 +864,8 @@ addLayer("c", {
         if(hasChallenge("mr",11)) pow += (challengeCompletions("mr",11)*0.3)+0.05
         if(hasUpgrade("mr",53)) pow += 2
         
-        return Decimal.max(player.c.total,1).pow(pow).mul(3).add(1)
+        if(player.c.total.isNan()) return new Decimal(1)
+        return player.c.total.pow(pow).mul(3).add(1)
       },
       effectDisplay(){return "x" + format(this.effect())},
       cost: new Decimal(1),
@@ -1049,7 +1050,10 @@ addLayer("c", {
     131: {
       title: "Collapse to energy",
       description: "Collapse boosts energy gain",
-      effect(){return player.c.points.log(1.2).pow(2)},
+      effect(){
+        if(player.c.points.isNan()) return new Decimal(1)
+        return player.c.points.max(1).log(1.2).pow(2).max(1)
+      },
       effectDisplay(){return `x${format(this.effect())} energy`},
       cost: new Decimal(1e24),
       canAfford(){return hasUpgrade("c",121) && player.c.points.gte(this.cost)},
@@ -1059,7 +1063,10 @@ addLayer("c", {
     132: {
       title: "Energy to collapse",
       description: "Energy boosts collapse gain",
-      effect(){return player.e.points.log(1.2).pow(2)},
+      effect(){
+        if(player.e.points.isNan()) return new Decimal(1)
+        return player.e.points.max(1).log(1.2).pow(2).max(1)
+      },
       effectDisplay(){return `x${format(this.effect())} energy`},
       cost: new Decimal(1e32),
       canAfford(){return hasUpgrade("c",122) && player.c.points.gte(this.cost)},
@@ -1220,9 +1227,10 @@ addLayer("e", {
   baseAmount() {return player.points},
   passiveGeneration(){
     gain = 0;
-    gain += player.e.buyables[41]/20
-    gain *= 1+ player.e.buyables[42]/10
-    if(this.canReset()) return gain
+
+    gain += (player.e.buyables[41]/20)
+    gain *= 1+(player.e.buyables[42]/10)
+    if(this.canReset() && this.getResetGain().gte(1)) return gain
   },
   
   gainMult() {
@@ -1232,7 +1240,9 @@ addLayer("e", {
     if(hasUpgrade("c",131)) mult = mult.mul(upgradeEffect("c",131))
     
     if (hasUpgrade("b",13)) mult = mult.mul(upgradeEffect("b",13))
-    return mult
+
+    if(mult.isNan()) return new Decimal(1)
+    return mult.max(1)
   },
   
   prestigeButtonText(){
@@ -1251,7 +1261,7 @@ addLayer("e", {
     return new Decimal(1.6).pow(this.getResetGain().add(1).div(this.gainMult())).mul(1e24).add(1)
   },
   getResetGain(){
-    return player.points.div(1e24).log(1.6).mul(this.gainMult()).add(1).floor()
+    return player.points.max(1).div(1e24).log(1.6).mul(this.gainMult()).add(1).floor().max(1)
   },
   
   buyables: {
