@@ -7,12 +7,12 @@ let modInfo = {
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal (10), // Used for hard resets and new players
-	offlineLimit: 1,  // In hours
+	offlineLimit: 2,  // In hours
 }
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.9c",
+	num: "1.9d",
 	name: "Rebirth 12",
 }
 
@@ -122,12 +122,12 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-  "Endgame: e25,865 points"
+  "Endgame: e1,100 collapse points"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("e25865"))
+	return player.c.points.gte(new Decimal("e1100"))
 }
 
 
@@ -141,7 +141,7 @@ var backgroundStyle = {
 
 // You can change this if you have things that can be messed up by long tick lengths
 function maxTickLength() {
-	return(3600)
+	return(7200)
 }
 
 // Use this if you need to undo inflation from an older version. If the version is older than the version that fixed the issue,

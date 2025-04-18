@@ -129,7 +129,7 @@ addLayer("mr", {
   
   type: "custom",
   requires(){
-    let costs = [1,"1e30","1e80","1e100","1e110","eeeeeeee9"];
+    let costs = [1,"1e30","1e80","1e100","1e110","1e900","eeeeeeee9"];
     if(player.mr.points.gte(5)) return false
     return new Decimal(costs[player[this.layer].points]);
   },
@@ -203,34 +203,34 @@ addLayer("mr", {
       unlocked() {return player.mr.points.gte(0)}
     },
     1: {
-      requirementDescription: "[2] 2 Minirebirths / 1e30 collapse", //[1,"1e30","1e80","1e100","1e105","eeeeeeee9"];
+      requirementDescription: "[2] 2 Minirebirths / e30 collapse",
       effectDescription: "Get 5% of collapse points per second and automate milestone resets",
       done() { return player.mr.points.gte(2)},
       toggles: [["m","autoReset"]],
       unlocked() {return player.mr.points.gte(1)}
     },
     2: {
-      requirementDescription: "[3] 3 Minirebirths / 1e80 collapse",
+      requirementDescription: "[3] 3 Minirebirths / e80 collapse",
       effectDescription: "Unlock Challenges",
       done() { return player.mr.points.gte(3)},
       unlocked() {return player.mr.points.gte(2)}
     },
     3: {
-      requirementDescription: "[4] 4 Minirebirths / 1e100 collapse",
+      requirementDescription: "[4] 4 Minirebirths / e100 collapse",
       effectDescription: "Unlock some upgrades & a new challenge",
       done() { return player.mr.points.gte(4)},
       unlocked() {return player.mr.points.gte(3)}
     },
     4: {
-      requirementDescription: "[5] 5 Minirebirths / 1e110 collapse",
+      requirementDescription: "[5] 5 Minirebirths / e110 collapse",
       effectDescription: "Start with one collapse point and get a few new upgrades",
       done() { return player.mr.points.gte(5)},
       unlocked() {return player.mr.points.gte(4)}
     },
     5: {
-      requirementDescription: "[unobtainable] 6 Minirebirths / Infinity collapse",
-      effectDescription: "Milestone Resets dont reset anything and unlock something",
-      done() { return player.mr.points.gte(5)},
+      requirementDescription: "[6] 6 Minirebirths / e900 collapse",
+      effectDescription: "This doesn't do anything yet.",
+      done() { return player.mr.points.gte(6)},
       unlocked() {return player.mr.points.gte(5) && player.r.points.gte(12)}
     },
   },
@@ -832,18 +832,18 @@ addLayer("sa", {
       doneTooltip: "Beat 'Eternally Trapped' on the 3rd level without any automation",
     },
     13: {
-      name: "You did it!",
-      done() {return player.points.gte("e25865")},
+      name: "You did it! [look in achievements for a new tab]",
+      done() {return player.c.points.gte("e1100")},
 
       goalTooltip(){return "You can get this one with normal progression, don't worry!"},
       doneTooltip: "Beat the game.",
     },
     14: {
       name: "Torn Apart",
-      done() {return hasAchievement("sa",13) && player.timePlayed <= 3600*18}, //I use hasAchievement("sa",13) so I only have to change one boolean instead of two.
+      done() {return player.c.points.gte("e1100") && player.timePlayed <= 3600*16},
 
-      goalTooltip(){return (player.timePlayed > 3600*18) ? "Do something ridiciously fast.. is this even possible?<br>This achievement is no longer obtainable<br>Tip: I would not recommend using offline progress with this" : "Do something ridiciously fast.. is this even possible?<br>Tip: I would not recommend using offline progress with this"},
-      doneTooltip: "Beat the game in under 18 hours.",
+      goalTooltip(){return (player.timePlayed > 3600*16) ? "Do something ridiciously fast.. is this even possible?<br>This achievement is no longer obtainable because of how long you have spent in the game.<br>Tip: I would not recommend using offline progress with this" : "Do something ridiciously fast.. is this even possible?<br>Tip: I would not recommend using offline progress with this"},
+      doneTooltip: "Beat the game in under 16 hours.",
     },
   },
   tabFormat: [

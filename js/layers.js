@@ -326,8 +326,8 @@ addLayer("u", {
   
   clickables: {
     11: {
-      display() {return "Respec all upgrades [refund]"},
-      tooltip: "This will also force an upgrade reset",
+      display() {return "Respec all upgrades"},
+      tooltip(){return player.r.points.gte(12) ? "This will refund all upgrades without restting anything else" : "This will refund all upgrades and force an upgrade reset"},
       onClick() {
         doReset("u",true)
         player.p.milestones = player.p.milestones.filter(item => item != 4);
@@ -450,6 +450,18 @@ addLayer("u", {
       pay(){player.u.used = player.u.used.add(5)},
       unlocked(){return hasMilestone("r", 5)}
     },
+    61: {
+      fullDisplay(){
+        return "<h2>Row 3+</h2><br>'Row 3 Booster' (B layer) is significantly stronger<br>Costs 5 upgrade points"
+      },
+      
+      style:{"width":"220px","border-radius":"8px"},
+      canAfford(){
+        return player.u.points.gt(player.u.used.add(4))
+      },
+      pay(){player.u.used = player.u.used.add(5)},
+      unlocked(){return hasMilestone("r", 5)}
+    },
   },
   
   hotkeys: [
@@ -556,10 +568,15 @@ addLayer("b", {
         let points = player.b.points.div(1.3).pow(1.2);
         if(player.b.points.gte(1)) points = points.add(1)
         if(player.c.sacrifices[2] > 0) points = points.div(1.5 ** player.c.sacrifices[2])
+        if(hasUpgrade("u",61)) points = points.pow(3)
+        if(points.isNan()) points = new Decimal(1)
 
         let power = player.b.points.add(1).log(200).add(1).mul(2.1)
+        if(hasUpgrade("u",61)) power = power.mul(6)
         if(hasUpgrade("c",142)) power = power.pow(1.25)
+        if(power.isNan()) power = new Decimal(1)
 
+        if(points.log(1.9).pow(power).add(1).max(1).isNan()) return new Decimal(1)
         return points.log(1.9).pow(power).add(1).max(1)
       },
       fullDisplay(){return "<strong>Row 3 Booster<strong><br>" + format(this.effect()) + "x more of all row 3 currencies<br> Toggle with '2'"},
@@ -845,7 +862,7 @@ addLayer("c", {
   gainMult() {
     mult = this.boost()
     if(hasMilestone("r",4)) mult = mult.mul(5)
-    if(player.e.buyables[31]) mult = mult.mul(10**player.e.buyables[31])
+    if(player.e.buyables[31]) mult = mult.mul(new Decimal(10).pow(player.e.buyables[31]))
     if(hasMilestone("m",6)) mult = mult.mul(milestoneEffect("m",6))
     
     if(hasUpgrade("c",132)) mult = mult.mul(upgradeEffect("c",132))
@@ -1315,16 +1332,10 @@ addLayer("e", {
     },
     31: {
       cost(x) {
-        //if(x.gte(100)) return new Decimal(1.63).pow(x)
-        if(x.gte(100)) return new Decimal(1.45).pow(x)
         return new Decimal(1.6).pow(x).mul(5)
       },
       max(x) {
         let max = new Decimal(x).div(5).log(1.6).ceil()
-        //if(max.gte(100))
-          //max = new Decimal(x).log(1.7).ceil().max(1)
-        if(max.gte(100))
-          max = new Decimal(x).log(1.45).ceil().max(1)
         
         return max
       },
