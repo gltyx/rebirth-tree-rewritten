@@ -541,6 +541,7 @@ addLayer("b", {
       },
       fullDisplay(){return "<strong>Point Booster<strong><br>" + format(this.effect()) + "x point gain<br> Toggle with '1'"},
       onPurchase(){if(!hasUpgrade("c",122)) player.b.upgrades = [11]},
+      unlocked(){return player.b.points.gte(1)},
     },
     12: {
       effect(){
@@ -560,6 +561,7 @@ addLayer("b", {
       },
       fullDisplay(){return "<strong>Prestige Booster<strong><br>" + format(this.effect()) + "x prestige gain<br> Toggle with '2'"},
       onPurchase(){if(!hasUpgrade("c",122)) player.b.upgrades = [12]},
+      unlocked(){return player.b.points.gte(1)},
     },
     13: {
       effect(){
@@ -579,7 +581,7 @@ addLayer("b", {
         if(points.log(1.9).pow(power).add(1).max(1).isNan()) return new Decimal(1)
         return points.log(1.9).pow(power).add(1).max(1)
       },
-      fullDisplay(){return "<strong>Row 3 Booster<strong><br>" + format(this.effect()) + "x more of all row 3 currencies<br> Toggle with '2'"},
+      fullDisplay(){return "<strong>Row 3 Booster<strong><br>" + format(this.effect()) + "x more of all row 3 currencies<br> Toggle with '3'"},
       onPurchase(){if(!hasUpgrade("c",122)) player.b.upgrades = [13]},
       unlocked(){return player.r.points.gte(12)},
     },
@@ -595,6 +597,9 @@ addLayer("b", {
   
   hotkeys: [
     {key: "b", description: "B: Get a booster point", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    {key: "1", description: "1: Buys the first Booster Upgrade", onPress(){if(layers.b.upgrades[11].unlocked()){player.b.upgrades.push("11");layers.b.upgrades[11].onPurchase()}}},
+    {key: "2", description: "2: Buys the second Booster Upgrade", onPress(){if(layers.b.upgrades[12].unlocked()){player.b.upgrades.push("12");layers.b.upgrades[12].onPurchase()}}},
+    {key: "3", description: "3: Buys the third Booster Upgrade", onPress(){if(layers.b.upgrades[13].unlocked()){player.b.upgrades.push("13");layers.b.upgrades[13].onPurchase()}}},
   ],
   layerShown(){return hasMilestone("p",5)},
   branches: ["p"],
