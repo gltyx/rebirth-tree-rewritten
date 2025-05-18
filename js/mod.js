@@ -12,7 +12,7 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.9d",
+	num: "1.10a",
 	name: "Rebirth 12",
 }
 
@@ -77,8 +77,8 @@ function getPointGen() {
   if(!player.c.sacrifices[3] > 0){
     if (hasUpgrade("p",11)) gain = gain.mul(1.5)
     if (hasUpgrade("p",13)) gain = gain.mul(upgradeEffect("p",13))
-    if (hasUpgrade("p",14)) gain = gain.mul(2)
-    if (hasUpgrade("p",15)) gain = gain.mul(3)
+    if (hasUpgrade("p",14)) gain = gain.mul(upgradeEffect("p",14))
+    if (hasUpgrade("p",15)) gain = gain.mul(upgradeEffect("p",15))
   }
   //other pre-collapse multiplication
   if (hasUpgrade("u",42)) gain = gain.mul(6)
@@ -87,32 +87,33 @@ function getPointGen() {
   if(player.c.sacrifices[3] > 1) gain = gain.div(10000 ** (player.c.sacrifices[3]-1))
   //collapse multiplication
   if (hasUpgrade("c",11)) gain = gain.mul(upgradeEffect("c",11))
-  if (hasUpgrade("c",21)) gain = gain.mul(2)
-  if (hasUpgrade("c",32)) gain = gain.mul(2)
+  if (hasUpgrade("c",21)) gain = gain.mul(3)
   if (hasUpgrade("c",53)) gain = gain.mul(4)
   if (hasUpgrade("c",61) && layers.c.sacAm == 0) gain = gain.mul(100)
   //powers
   let pow = new Decimal(1);
-  if (hasMilestone("m",7)) pow = pow.add(0.1)
-  if(player.e.buyables[22]) pow = pow.add((player.e.buyables[22]/10))
+  pow = pow.add(new Decimal(player.mr.challenges[21]).mul(0.1))
   if (hasMilestone("m",9)) pow = pow.add(milestoneEffect("m",9))
 
-  if(hasUpgrade("mr",11)) pow = pow.add(0.1)
-  if(hasUpgrade("mr",21)) pow = pow.add(0.1)
-  if(hasUpgrade("mr",31)) pow = pow.add(0.1)
-
-  pow = pow.add(new Decimal(player.mr.challenges[21]).mul(0.1))
+  if(player.e.buyables[22]) pow = pow.mul(1+(player.e.buyables[22]/10))
+  if (hasMilestone("m",7)) pow = pow.mul(1.1)
+  if(hasUpgrade("mr",11)) pow = pow.mul(1.1)
+  if(hasUpgrade("mr",21)) pow = pow.mul(1.1)
+  if(hasUpgrade("mr",31)) pow = pow.mul(1.1)
   
   gain = gain.pow(pow);
   if(player.c.sacrifices[0] > 0) gain = gain.pow(0.75 ** player.c.sacrifices[0])
-
-  if(hasUpgrade("mr",23)) gain = gain.mul(100)
-  //misc
-  gain = gain.mul(layers.a.achBoost())
-  gain = gain.mul(new Decimal(50).pow(getBuyableAmount("mr",21)))
-  gain = gain.add(new Decimal(100).pow(getBuyableAmount("mr",11)).sub(1))
   
-  if(gain.gte(1e1000)) gain = gain.div(1e1000).log(2).mul(1e1000)
+  //misc
+  if(!inChallenge("mr",22)){
+    if(hasUpgrade("mr",23)) gain = gain.mul(1000)
+
+    gain = gain.mul(layers.a.achBoost())
+    gain = gain.mul(new Decimal(50).pow(getBuyableAmount("mr",21)))
+    gain = gain.add(new Decimal(100).pow(getBuyableAmount("mr",11)).sub(1))
+  }
+  
+  //if(gain.gte(1e1000)) gain = gain.div(1e1000).log(2).mul(1e1000)
 	return gain
 }
 
@@ -122,12 +123,11 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-  "Endgame: e1,100 collapse points"
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.c.points.gte(new Decimal("e1100"))
+	return hasUpgrade("v",11)
 }
 
 
@@ -147,8 +147,6 @@ function maxTickLength() {
 // Use this if you need to undo inflation from an older version. If the version is older than the version that fixed the issue,
 // you can cap their current resources with this.
 function fixOldSave(oldVersion){
-  if(player.c.points.lt(0)) player.c.points = new Decimal(0)
-  if(player.e.points.lt(0)) player.e.points = new Decimal(0)
   if(oldVersion === "v1.6" && player.c.max > 2) player.c.max = 2
 
   console.log("old version: " + oldVersion)

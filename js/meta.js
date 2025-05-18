@@ -6,7 +6,7 @@ addLayer("r", {
   row: 25,
   position: 0,
   tooltip(){
-    if(player.r.points.gte(11)) return `<h2>Rebirth</h2><br>Rebirth r${formatWhole(player.r.points)}m${formatWhole(player.mr.points)}`
+    if(player.r.points.gte(11)) return `<h2>Rebirth</h2><br>Rebirth r${formatWhole(player.r.points)}m${formatWhole(player.mr.points)}<br>${layers.mr.essence()}/${layers.mr.totalEssence()} MR essence`
     return `<h2>Rebirth</h2><br>Rebirth r${formatWhole(player.r.points)}`
   },
   shouldNotify(){return this.canReset()},
@@ -19,18 +19,23 @@ addLayer("r", {
   }},
   type: "custom",
   getNextAt(){
-    let costs = [0,5,75,15000,5000000,1e10,1e13,1e16,1e20,1e175,"1e2025","1e7000","eeeeee9"]
+    let costs = [0,3,75,50000,25000000,1e10,1e12,1e15,1e24,1e250,"1e1111","1e6666","1e185000","eeeeee9"]
     return new Decimal(costs[player[this.layer].points])
   },
   getResetGain(){
     return new Decimal(1)
   },
   canReset(){
+    if(player.r.points.gte(12) && !hasUpgrade("s",82)) return false
     return getPointGen().gte(this.getNextAt())
   },
   prestigeButtonText(){
-    if(player.r.points.gte(12)) return "Congratulations! You are at the final rebirth!"
-    return "Lose all progress for a rebirth point<br>Requires: " + format(this.getNextAt()) + " points per second"
+    if(player.r.points.gte(13)) return "Congratulations! You are at the final rebirth!"
+    if(player.r.points.gte(12) && !hasUpgrade("s",82)) return `Lose all previous progress and Rebirth.<br><s>Requires ${format(this.getNextAt(),1)} points per second</s><br>The next rebirth is locked..`
+    if(player.r.points.eq(0)) return `Lose all previous progress and Rebirth.`
+    return `Lose all previous progress and Rebirth.<br>${format(this.baseAmount(),1)}/${format(this.getNextAt(),1)} (${format(this.baseAmount().add(1).log(10).div(this.getNextAt().add(1).log(10)).mul(100),1)}%) points per second`
+
+    //this.baseAmount().add(1).log(10).div(this.getNextAt().add(1).log(10))
   },
   requires(){
     return this.getNextAt()
@@ -38,45 +43,55 @@ addLayer("r", {
   
   milestones: {
     0: {
-      requirementDescription: "[1] 6 rebirths",
-      effectDescription: "Keep two milestone points permamently (including on row 3 and rebirth)",
-      done() { return player.r.points.gte(6)},
+      requirementDescription: "[1] 5 rebirths",
+      effectDescription: "Keep an upgrade point on all resets, permamently.",
+      done() { return player.r.points.gte(5)},
       unlocked() {return this.done()}
     },
     1: {
-      requirementDescription: "[2] 7 rebirths",
-      effectDescription: "Keep four milestone points permamently",
-      done() { return player.r.points.gte(7)},
+      requirementDescription: "[2] 6 rebirths",
+      effectDescription: "Keep three milestone points on all resets, permamently.",
+      done() { return player.r.points.gte(6)},
       unlocked() {return this.done()}
     },
     2: {
-      requirementDescription: "[3] 8 rebirths",
-      effectDescription: "Keep prestige upgrade automation",
-      done() { return player.r.points.gte(8)},
+      requirementDescription: "[3] 7 rebirths",
+      effectDescription: "Keep the prestige upgrade automation on all resets, permamently.",
+      done() { return player.r.points.gte(7)},
       unlocked() {return this.done()}
     },
     3: {
-      requirementDescription: "[4] 9 rebirths",
-      effectDescription: "Keep five milestone points permamently<br>You can also automate reseting for collapse points.",
-      toggles: [["c","autoCollapse"]],
-      done() { return player.r.points.gte(9)},
+      requirementDescription: "[4] 8 rebirths",
+      effectDescription: "Keep five milestone points on all resets, permamently.",
+      done() { return player.r.points.gte(8)},
       unlocked() {return this.done()}
     },
     4: {
-      requirementDescription: "[5] 10 rebirths",
-      effectDescription: "Get 5x collapse points<br>You can also automate reseting for upgrade points",
+      requirementDescription: "[5] 9 rebirths",
+      effectDescription: "You can automatically reset for Upgrade Points",
       toggles: [["u","autoUpgrade"]],
       done() { return player.r.points.gte(10)},
       unlocked() {return this.done()}
     },
     5: {
-      requirementDescription: "[6] 12 rebirths",
-      effectDescription: "The first two minirebirths are kept on Rebirths. You can buy-max energy upgrades, and automate boosters.",
-      tooltip(){"Unlocks content in Upgrade and Booster layers"},
-      done() { return player.r.points.gte(12)},
+      requirementDescription: "[6] 10 rebirths",
+      effectDescription: "You can automatically reset for Boosters",
       toggles: [["b","autoBooster"]],
+      done() { return player.r.points.gte(10)},
       unlocked() {return this.done()}
-    }, //hasMilestone("r",5)
+    },
+    6: {
+      requirementDescription: "[7] 12 rebirths",
+      effectDescription: "Keep all chargers/chargers^2 on all persets, permamently.<br>You can buy-max energy upgrades.",
+      done() { return player.r.points.gte(12)},
+      unlocked() {return this.done()}
+    },
+    7: {
+      requirementDescription: "[8] 13 rebirths",
+      effectDescription: "Keep 3 minirebirths on all resets. Both U-upgrade and P-upgrade autobuyers can buy all currently unlocked upgrades.<br>Also, all B-layer and C-layer upgrades are kept.",
+      done() { return player.r.points.gte(13)},
+      unlocked() {return this.done() || player.r.points.gte(12)}
+    },
   },
   
   resource: "rebirth points",
@@ -89,18 +104,24 @@ addLayer("r", {
         "main-display",
         "prestige-button",
         "blank",
+        "blank",
         "milestones",
         "blank",
         "blank",
         "blank",
         "blank",
-        ["raw-html",`<a href="https://rebirth-tree-rewritten.glitch.me" target="_self">This button will redirect you to glitch (older version) if you have lost your save</a>`,
+        ["raw-html",`<a href="https://rebirth-tree-rewritten.glitch.me" target="_self">This button will redirect you an older version if you have lost your save</a>`,
         "blank",]
       ],
     },
     "Mini Rebirths": {
       embedLayer: "mr",
       unlocked(){return player.r.points.gte(11)},
+    },
+    "Void": {
+      embedLayer: "v",
+      unlocked(){return hasAchievement("a",112)},
+      buttonStyle: {"border-color":"#FD68FF"},
     },
   },
   
@@ -121,28 +142,30 @@ addLayer("mr", {
   doReset(resettingLayer) {
     if (layers[resettingLayer].row <= this.row) return;
     layerDataReset(this.layer);
-    if(hasMilestone("r",5)) player.mr.points = new Decimal(2);
+    if(hasMilestone("r",7)) player.mr.points = new Decimal(3);
   },
   resource: "mini rebirths",
-  baseAmount() {return player.c.points},
+  baseAmount() {return player.c.total.add(layers.c.getResetGain())},
   baseResource: "collapse points",
   
   type: "custom",
   requires(){
-    let costs = [1,"1e30","1e80","1e100","1e110","1e900","eeeeeeee9"];
-    if(player.mr.points.gte(5)) return false
+    let costs = [0,"1e30","1e80","1e100","1e120","1e800","eeeeeeee9"];
+    if(player.mr.points.gte(5) && player.r.points.lt(12)) return false
+    if(player.mr.points.gte(6)) return false
     return new Decimal(costs[player[this.layer].points]);
   },
   canReset(){return this.requires() ? player.c.points.gte(this.requires()) : false},
   prestigeButtonText(){
     if(!this.requires()) return "The next minirebirth is unobtainable"
-    return `Next mini rebirth: ${format(this.getNextAt())} collapse points`
+    //this.baseAmount().log10().div(this.getNextAt().log10())
+    return `Lose all previous progress and Mini-Rebirth<br>${format(this.baseAmount())}/${format(this.getNextAt())} (${format(this.baseAmount().add(1).log10().div(this.getNextAt().add(1).log10()).mul(100),1)}%) collapse points`
   },
   getNextAt(){return this.requires()},
   getResetGain(){return new Decimal(1)},
   totalEssence(){
     var essence = player.mr.points
-    if(player.r.points.gte(12)) essence = essence.add(2)
+    if(player.r.points.gte(13)) essence = essence.add(2)
 
     essence = essence.add(player.mr.challenges[11])
     essence = essence.add(player.mr.challenges[12])
@@ -152,7 +175,7 @@ addLayer("mr", {
   },
   essence(){
     var essence = player.mr.points.sub(player.mr.used)
-    if(player.r.points.gte(12)) essence = essence.add(2)
+    if(player.r.points.gte(13)) essence = essence.add(2)
 
     essence = essence.add(player.mr.challenges[11])
     essence = essence.add(player.mr.challenges[12])
@@ -164,6 +187,7 @@ addLayer("mr", {
   tabFormat: [
     "main-display",
     "prestige-button",
+    "blank",
     "milestones",
     "blank",
     ["display-text",
@@ -228,8 +252,8 @@ addLayer("mr", {
       unlocked() {return player.mr.points.gte(4)}
     },
     5: {
-      requirementDescription: "[6] 6 Minirebirths / e900 collapse",
-      effectDescription: "This doesn't do anything yet.",
+      requirementDescription: "[6] 6 Minirebirths / e800 collapse",
+      effectDescription: "Unlock a new Collapse Sacrifice and MR challenge.",
       done() { return player.mr.points.gte(6)},
       unlocked() {return player.mr.points.gte(5) && player.r.points.gte(12)}
     },
@@ -240,9 +264,12 @@ addLayer("mr", {
         let sacrifices = "A powerful Power, Uselessness"
         if(player.mr.challenges[11] >= 1) sacrifices += ", Anti-Boosters"
         if(player.mr.challenges[11] >= 2) sacrifices += ", Inflated Upgrades"
-        if(player.mr.challenges[11] >= 3) sacrifices += ", Extremely Powerful"
+        if(player.mr.challenges[11] >= 3) {
+          if(player.mr.points.gte(6)) sacrifices = "the first five challenges"
+          else sacrifices = " every challenge"
+        }
 
-        return `<h2>Eternally Trapped [${player.mr.challenges[11]}/3]</h2><br> You are stuck in level 2 of ${sacrifices}. Also reduces Collapse requirement by /100<br>Goal: 1e9 collapse points<br>Reward: Strengthen sacrifice reward by ^+0.2 per level`},
+        return `<h2>Eternally Trapped [${player.mr.challenges[11]}/3]</h2><br> You are trapped level 2 of ${sacrifices} (until you exit) and reduces Collapse requirement by /10,000<br>Goal: 1e9 collapse points<br>Reward: Boost sacrifice reward by ^+0.2 per level)`},
       onEnter(){
         if(player.mr.challenges[11] == 0) player.c.sacrifices = [2,0,0,2,0]
         if(player.mr.challenges[11] == 1) player.c.sacrifices = [2,0,2,2,0]
@@ -252,24 +279,30 @@ addLayer("mr", {
       onExit(){
         if(!hasAchievement("sa",12) && player.mr.challenges[11]>=3 && !player.c.autoCollapse && !player.c.autoUpgrade && !player.u.autoUpgrade && !player.u.autoUUpgrade && !player.b.autoBooster) player.sa.achievements.push(12)
       },
-      canComplete: function() {return player.c.points.gte(1e9)},
+      canComplete: function() {return player.c.points.gte(1e6)},
       completionLimit: 3,
       unlocked(){return hasMilestone("mr",2)}
     },
     12: {
-      fullDisplay(){return `<h2>Total point breakdown [${player.mr.challenges[12]}/5]</h2><br> Nerf or remove almost every upgrade/milestone in the prestige layer.<br>Goal: ${format(this.goal())} points<br>Reward: Strengthens the first collapse upgrade and passive generation`},
-      goal(){return new Decimal([1e10,1e50,1e200,"1e500","1e800","1e800"][player.mr.challenges[12]])},
+      fullDisplay(){return `<h2>Total point breakdown [${player.mr.challenges[12]}/3]</h2><br> Nerf or remove almost every upgrade/milestone in the prestige layer.<br>Goal: ${format(this.goal())} points<br>Reward: Strengthens the first collapse upgrade and passive generation`},
+      goal(){return new Decimal([75000,1e200,"1e1200","1e1200"][player.mr.challenges[12]])},
       onEnter(){player.c.sacrifices = [this.difficulty(),this.difficulty(),this.difficulty(),this.difficulty(),this.difficulty()]},
       canComplete: function() {return player.points.gte(this.goal())},
-      completionLimit: 5,
+      completionLimit: 3,
       unlocked(){return hasMilestone("mr",2)}
     },
     21: {
-      fullDisplay(){return `<h2>Feature Disablation [${player.mr.challenges[21]}/3]</h2><br>You are unable to use Collapse Sacrifices. You act like you are in "Anti-boosters" 10 times, and "Inflated Upgrades" 6 times. You also gain ^0.75 points<br>Goal: ${formatWhole(new Decimal(1e20).pow(player.mr.challenges[21]).mul(1e11))} points<br>Reward: ^1.1 points`},
-      onEnter(){player.c.sacrifices = [1,6,10,0,0]},
-      canComplete: function() {return player.points.gte(new Decimal(1e20).pow(player.mr.challenges[21]).mul(1e11))},
+      fullDisplay(){return `<h2>Feature Disablation [${player.mr.challenges[21]}/3]</h2><br>You are trapped inside of "A powerful power" once, "Inflated Upgrades" six times, "Antiboosters" ten times, and "Uselessness" once<br>Goal: ${formatWhole(new Decimal(1e10).pow(player.mr.challenges[21]).mul(1e10))} points<br>Reward: ^1.1 points per completion`},
+      onEnter(){player.c.sacrifices = [1,6,10,1,0]},
+      canComplete: function() {return player.points.gte(new Decimal(1e10).pow(player.mr.challenges[21]).mul(1e10))},
       completionLimit: 3,
       unlocked(){return hasMilestone("mr",3)}
+    },
+    22: {
+      fullDisplay(){return `<h2>Unilayer[${player.mr.challenges[22]>=1 ? "Completed" : "Incomplete"}]</h2><br>Disable every non-meta layer except Prestige. Modifies some values and effects, and every non-prestige buffs to points are completely disabled<br>Goal: e2025 prestige<br>Reward: Unlock something new`},
+      canComplete: function() {return player.p.points.gte("1e2025")},
+      completionLimit: 1,
+      unlocked(){return hasMilestone("mr",5)}
     },
   },
   upgrades: {
@@ -291,7 +324,7 @@ addLayer("mr", {
       },
       
       canAfford(){
-        return layers.mr.essence().gte(-2)
+        return true
       },
       pay(){
         player.mr.used = player.mr.used.sub(2)
@@ -314,9 +347,9 @@ addLayer("mr", {
     },
     22: {
       fullDisplay(){
-        return "Gain a static 100x point multiplier<br>Cost: 1 Minirebirth Essence"
+        return "Gain a static 1,000x point multiplier<br>Cost: 1 Minirebirth Essence"
       },
-      tooltip: "This will ignore any challenge effects.",
+      tooltip: "This ignores <em>all</em> nerfs and buffs, including from minirebirth challenges.",
       
       canAfford(){
         return layers.mr.essence().gte(1) && hasUpgrade("mr",11)
@@ -342,17 +375,17 @@ addLayer("mr", {
     },
     31: {
       fullDisplay(){
-        return "<big>^1.1 points</big><br>Cost: 2 Minirebirth essences"
+        return "<big>^1.1 points</big><br>Cost: 1 Minirebirth essences"
       },
       
       canAfford(){
-        return layers.mr.essence().gte(2) && hasUpgrade("mr",21)
+        return layers.mr.essence().gte(1) && hasUpgrade("mr",21)
       },
       pay(){
-        player.mr.used = player.mr.used.add(2)
+        player.mr.used = player.mr.used.add(1)
       },
       branches: [21],
-      unlocked(){return hasMilestone("mr",3)},
+      unlocked(){return hasMilestone("mr",2)},
     },
     32: {
       fullDisplay(){
@@ -380,7 +413,7 @@ addLayer("mr", {
         player.mr.used = player.mr.used.add(1)
       },
       branches: [23],
-      unlocked(){return hasMilestone("mr",3)},
+      unlocked(){return hasMilestone("mr",2)},
     },
     42: {
       fullDisplay(){
@@ -395,7 +428,7 @@ addLayer("mr", {
         player.mr.used = player.mr.used.add(2)
       },
       branches: [32],
-      unlocked(){return hasMilestone("mr",3)},
+      unlocked(){return hasMilestone("mr",2)},
     },
     51: {
       fullDisplay(){
@@ -430,14 +463,14 @@ addLayer("mr", {
     },
     53: {
       fullDisplay(){
-        return "Strengthen the first (top-left) upgrade in collapse<br>Cost: 2 Minirebirth Essences"
+        return "Strengthen the first (top-left) upgrade in collapse<br>Cost: 1 Minirebirth Essences"
       },
       
       canAfford(){
-        return layers.mr.essence().gte(2) && hasUpgrade("mr",42)
+        return layers.mr.essence().gte(1) && hasUpgrade("mr",42)
       },
       pay(){
-        player.mr.used = player.mr.used.add(2)
+        player.mr.used = player.mr.used.add(1)
       },
       branches: [42],
       unlocked(){return hasMilestone("mr",4)},
@@ -462,19 +495,76 @@ addLayer("mr", {
     {key: "R", description: "Shift + R: Reset for a minirebirth", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
   ],
   layerShown(){return false},
-}) //Mini Rebirth
+}) 
+addLayer("v", {
+  color: "#FD68FF",
+  row: 26,
+  
+  startData() { return {
+    unlocked: false,
+    points: new Decimal(0),
+  }},
+  resource: "void",
+  baseAmount() {return player.r.points},
+  baseResource: "rebirths",
+  
+  type: "custom",
+  requires: new Decimal(13),
+  getNextAt(){return player.r.points.add(1)},
+  prestigeButtonText(){
+    if(hasAchievement("a",112)) return `Enter void.<br>This requires ${player.r.points.min(13)}/13 rebirths and Void (Space Upgrade)`
+    return `Enter void.`
+  },
+  canReset(){return hasUpgrade("s",83)},
+  getResetGain(){return new Decimal(1)},
+  milestones: {
+    0: {
+      requirementDescription: "[1] 1 Void",
+      effectDescription: "Space and all of it's upgrades are always unlocked. Also cheapens 'Row 2' in Space.",
+      done() { return player.v.points.gte(1)}
+    },
+  },
+
+  upgrades: {
+    11: {
+      fullDisplay(){
+        return "<big>^2 prestige points</big><br>(This is also the end of content)<br>Cost: 1 Void"
+      },
+      cost: new Decimal(1),
+    },
+  },
+
+  layerShown(){return false},
+}) 
+//83
+
 addLayer("a", {
   tabFormat: {
     "Achievements": {
       content: [
         ["display-text",
-        function() {return `Achievements are boosting point gain by <strong>x${format(layers.a.achBoost())}</strong>`}],
+        function() {
+          let effect = `Achievements are boosting point gain`
+          effect += ` by <strong>x${format(layers.a.achBoost())}</strong>`
+          if(hasUpgrade("s",81) || hasUpgrade("s",43))
+            effect += `<br>They are also boosting`
+
+          if(hasUpgrade("s",81)) effect += ` Milestone 3`
+          if(hasUpgrade("s",43) && hasUpgrade("s",81)) effect += " and"
+          if(hasUpgrade("s",43)) effect += ` Boosters`
+
+          if(hasUpgrade("s",81) || hasUpgrade("s",43))
+            effect += ` by <strong>^${format(layers.a.achBoost().log(2).min(20))}</strong>`
+
+          return effect
+
+        }],
         "blank",
         "blank",
         "achievements"
       ],
     },
-    "Secret Achievments": {
+    "[SAs] Secret Achievments": {
       embedLayer: "sa",
       unlocked(){return player.sa.achievements.length>=1},
     },
@@ -581,14 +671,14 @@ addLayer("a", {
       tooltip: "Buy a collapse upgrade",
     },
     34: {
-      name: "Pentagon",
-      done() {return player.c.upgrades.length >= 5},
-      tooltip: "Buy all 5 collapse upgrades",
+      name: "Diamond",
+      done() {return player.c.upgrades.length >= 4},
+      tooltip: "Buy all 4 collapse upgrades",
     },
     35: {
       name: "Buyout",
-      done() {return player.c.upgrades.length >= 7},
-      tooltip: "Buy all 7 collapse upgrades",
+      done() {return player.c.upgrades.length >= 6},
+      tooltip: "Buy 6 collapse upgrades",
     },
     36: {
       name: "The Start of a New Rebirth",
@@ -612,8 +702,8 @@ addLayer("a", {
     },
     43: {
       name: "Another Buyout",
-      done() {return player.c.upgrades.length >= 11},
-      tooltip: "Obtain eleven collapse upgrades",
+      done() {return player.c.upgrades.length >= 10},
+      tooltip: "Obtain ten collapse upgrades",
     },
     44: {
       name: "Deca-boosters",
@@ -626,34 +716,34 @@ addLayer("a", {
       tooltip: "Get your 8th rebirth",
     },
     46: {
-      name: "I'm back",
-      done() {return player.r.points.gte(8) && player.c.upgrades.length >= 11},
-      tooltip: "Obtain eleven collapse upgrades during your 8th rebirth",
-    },
-    47: {
       name: "Quadrupled sacrifices",
       done() {return tmp.c.sacAm >= 4 && player.points.gte(1e9)},
       tooltip: "Complete a run with four or more sacrifices",
     },
-    51: {
+    47: {
       name: "Getting them all",
-      done() {return tmp.c.sacAm >= 5 && player.points.gte(1e10)},
+      done() {return tmp.c.sacAm >= 5 && player.points.gte(1e11)},
       tooltip: "Complete a run with five or more sacrifices",
     },
-    52: {
+    51: {
       name: "Collapse Millionare",
       done() {return player.c.points.gte(1e6)},
       tooltip: "Get 1e6 collapse points",
     },
-    53: {
+    52: {
       name: "So many Upgrades",
       done() {return player.c.upgrades.length >= 18},
       tooltip: "Obtain 18 collapse upgrades",
     },
-    54: {
+    53: {
       name: "Billionare",
       done() {return player.c.points.gte(1e9)},
       tooltip: "Get 1e9 collapse points",
+    },
+    54: {
+      name: "Hexasacrifices",
+      done() {return tmp.c.sacAm >= 6 && player.points.gte(1e11)},
+      tooltip: "Complete a run with six or more sacrifices",
     },
     55: {
       name: "Septa sacrifices",
@@ -692,8 +782,8 @@ addLayer("a", {
     },
     65: {
       name: "Upgradeless twos",
-      done() {return player.points.gte(1e22) && player.u.points.eq(0)},
-      tooltip: "Obtain 1e22 points or more without any upgrade points",
+      done() {return player.points.gte(1e22) && player.u.points.lte(1) && player.u.upgrades.length == 0},
+      tooltip: "Obtain 1e22 points or more without resetting in the U layer or buying any upgrades in the U layer",
     },
     66: {
       name: "Boosters are getting useless",
@@ -722,17 +812,17 @@ addLayer("a", {
     },
     74: {
       name: "Layer Expansion.?",
-      done() {return player.m.points.gte(6) && player.r.points.gte(10)}, //this requirement is added just in case v1.5 infinite milestone glitch
+      done() {return player.m.points.gte(6) && player.r.points.gte(10)}, //this requirement is added just in case someone has a v1.5 save and used infinite milestones glitch
       tooltip: "Get 6 milestone points",
     },
     75: {
       name: "A second digit!",
-      done() {return player.m.points.gte(10)},
+      done() {return player.m.points.gte(10) && player.r.points.gte(10)},
       tooltip: "Get 10 milestone points",
     },
     76: {
       name: "All ten",
-      done() {return player.m.points.gte(36)},
+      done() {return player.m.points.gte(36) && player.r.points.gte(10)},
       tooltip: "Get 36 milestone points",
     },
     77: {
@@ -746,9 +836,9 @@ addLayer("a", {
       tooltip: "Collapse with 20 collapse sacrifices"
     },
     82: {
-      name: "totally rich",
-      done() {return player.points.gte(new Decimal("1e6000"))},
-      tooltip: "get 1e6,000 points.."
+      name: "Googol^10 Points",
+      done() {return player.points.gte(new Decimal("1e1000"))},
+      tooltip: "get 1e1,000 points"
     },
     83: {
       name: "Two of the same digits",
@@ -791,7 +881,7 @@ addLayer("a", {
       tooltip: "Complete a collapse run with all 25 sacrifices"
     },
     94: {
-      name: "Maximum Handicaps +1",
+      name: "Maximum Handicaps.. plus one",
       done() {return tmp.c.sacAm >= 25 && player.points.gte(1e30) && inChallenge("mr",12)},
       tooltip: "Complete a collapse run with all 25 sacrifices inside of Total point breakdown"
     },
@@ -801,7 +891,7 @@ addLayer("a", {
       tooltip: "Get 5 mini rebirths"
     },
     96: {
-      name: "I dont need any of those",
+      name: "Featureless",
       done() {return player.mr.challenges[21] >= 3},
       tooltip: "Beat Feature Disablation three times"
     },
@@ -810,10 +900,65 @@ addLayer("a", {
       done() {return player.r.points.gte(12)},
       tooltip: "Get to the 12th rebirth"
     },
+    101: {
+      name: "New minirebirth!",
+      done() {return player.mr.points.gte(6)},
+      tooltip: "Get to the 6th minirebirth"
+    },
+    102: {
+      name: "One layer beats them all",
+      done() {return hasChallenge("mr",22)},
+      tooltip: "Beat 'Unilayer' once"
+    },
+    103: {
+      name: "New Layer!",
+      done() {return player.s.points.gte(1)},
+      tooltip: "Enter Space"
+    },
+    104: {
+      name: "More upgrades",
+      done() {return player.u.upgrades.length >= 11},
+      tooltip: "Have all U-layer upgrades at once"
+    },
+    105: {
+      name: "How many do you even need",
+      done() {return player.u.points.gte(53)},
+      tooltip: "Have atleast 53 upgrade points at once"
+    },
+    106: {
+      name: "Layer 3 multi-boosts",
+      done() {return hasUpgrade("s",21) && hasUpgrade("s",22)},
+      tooltip: "Have both layer-3 Space upgrades at once"
+    },
+    107: {
+      name: "Achievements are useful again",
+      done() {return hasUpgrade("s",81)},
+      tooltip: "Have both layer-3 Space upgrades at once"
+    },
+    111: {
+      name: "I've ran out of rebirth names",
+      done() {return player.r.points.gte(13)},
+      tooltip: "Have 13 Rebirths"
+    },
+    112: {
+      name: "What's this?",
+      done() {return hasUpgrade("s",83)},
+      tooltip: "Unlock Void"
+    },
+    113: {
+      name: "Cleansed",
+      done() {return player.v.points.gte(1)},
+      tooltip: "Enter Void"
+    },
+    //hasUpgrade("s",81)
+    //hasUpgrade("s",21) && hasUpgrade("s",22);
+    //player.u.upgrades.length >= 11
   },
-  achBoost(){return new Decimal(1.065).pow(player.a.achievements.length)},
+  achBoost(){
+    if(hasUpgrade("s",91)) return new Decimal(1.15).pow(player.a.achievements.length).max(1)
+    return new Decimal(1.05).pow(player.a.achievements.length-1).max(1)
+  },
 }) //ACHIEVEMENTS
-
 addLayer("sa", {
   achievementPopups: true,
   achievements: {
@@ -821,7 +966,7 @@ addLayer("sa", {
       name: "What.?",
       done() {return hasUpgrade("p",91)},
 
-      goalTooltip: "Buy a very specific.. secret.. upgrade.",
+      goalTooltip: "Buy a secret.. inverted.. upgrade.",
       doneTooltip: "Unlock upgrade -11 in the prestige layer.",
     },
     12: {
@@ -842,7 +987,7 @@ addLayer("sa", {
       name: "Torn Apart",
       done() {return player.c.points.gte("e1100") && player.timePlayed <= 3600*16},
 
-      goalTooltip(){return (player.timePlayed > 3600*16) ? "Do something ridiciously fast.. is this even possible?<br>This achievement is no longer obtainable because of how long you have spent in the game.<br>Tip: I would not recommend using offline progress with this" : "Do something ridiciously fast.. is this even possible?<br>Tip: I would not recommend using offline progress with this"},
+      goalTooltip(){return "A copy of the simple one.. but sixteen hours. This may turn unbeatable if you take too long."},
       doneTooltip: "Beat the game in under 16 hours.",
     },
   },
@@ -852,4 +997,4 @@ addLayer("sa", {
     "blank",
     "achievements",
   ]
-}) //ACHIEVEMENTS
+}) 

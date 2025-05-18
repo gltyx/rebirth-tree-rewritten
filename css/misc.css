@@ -3,7 +3,7 @@
 /* Prestige button */
 .reset {
 	height: 100px;
-	width: 200px;
+	width: 250px;
 	border-radius: 15px;
 	border: 4px solid;
 	border-color: rgba(0, 0, 0, 0.125);
@@ -30,7 +30,7 @@
 .tooltip { 
   pointer-events: none;
   text-align: center;
-  width: 200px;
+  width: 300px;
   font-size: 14px;
   line-height: 1.2;
   bottom: 100%;
