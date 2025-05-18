@@ -2093,7 +2093,7 @@ addLayer("s", {
 
     layerDataReset(this.layer);
 
-    if(hasMilestone("v",0)){
+    if(hasMilestone("v",0) && layers[resettingLayer].row < 26){
       player.s.upgrades = upgs
     }
   },
