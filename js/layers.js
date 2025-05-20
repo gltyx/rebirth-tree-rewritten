@@ -53,7 +53,7 @@ addLayer("p", {
     return mult
   },
   gainExp() {
-    return new Decimal(0.8).pow(player.c.sacrifices[4]).mul(player.e.buyables[22]/10+1).mul(hasUpgrade("v",11)+1)
+    return new Decimal(0.8).pow(player.c.sacrifices[4]).mul(player.e.buyables[22]/10+1).mul(2*hasUpgrade("v",11)+1)
   },
   
   milestones: {
@@ -457,7 +457,7 @@ addLayer("u", {
   }},
   type: "custom",
   
-  autoPrestige(){return player.u.autoUpgrade && hasMilestone("r",4) && !inChallenge("mr",22)},
+  autoPrestige(){return this.layerShown() && player.u.autoUpgrade && hasMilestone("r",4) && !inChallenge("mr",22)},
   
   resource: "upgrade points",
   baseResource: "points",
@@ -481,9 +481,9 @@ addLayer("u", {
   },
   
   automate(){
-    if(player.u.autoUUpgrade && hasMilestone("mr",0) && player.u.points.sub(player.u.used).gte(1)){
+    if(player.u.autoUUpgrade && this.layerShown() && hasMilestone("mr",0) && player.u.points.sub(player.u.used).gte(1)){
       let order = [21,12,32,42,22,41,11]
-      if(hasMilestone("r",7)) order = [61,21,12,32,42,51,22,41,11,52,31]
+      if(hasMilestone("r",7) && player.r.points.gte(12)) order = [61,21,12,32,42,51,22,41,11,52,31]
       for(let i = 0; i < order.length; i++){
           if(!hasUpgrade("u",order[i]) && tmp.u.upgrades[order[i]].canAfford) {
             player.u.upgrades.push(order[i]);
@@ -667,7 +667,7 @@ addLayer("b", {
   },
   
   resetsNothing(){return hasUpgrade("c",112)},
-  autoPrestige(){return player.b.autoBooster && hasMilestone("r",5) && !inChallenge("mr",22) && layers.b.layerShown == true},
+  autoPrestige(){return player.b.autoBooster && hasMilestone("r",5) && !inChallenge("mr",22) && layers.b.layerShown() == true},
   
   shouldNotify(){return false},
   startData() { return {
@@ -836,6 +836,8 @@ addLayer("b", {
     let upg = player.b.upgrades
     
     layerDataReset("b")
+    
+    if(layers[resettingLayer].row >= 26) return;
     if(hasUpgrade("c",33) && layers[resettingLayer].row <= 2) player.p.milestones.push(5)
     if(layers[resettingLayer].row <= 2 || hasMilestone("r",7)) player.b.upgrades = upg
   },
@@ -1044,6 +1046,7 @@ addLayer("m", {
   doReset(resettingLayer) {
     if (layers[resettingLayer].row <= this.row) return;
     layerDataReset(this.layer);
+    if(layers[resettingLayer].row >= 26) return;
     if(hasMilestone("r",1)) player.m.points = new Decimal(3);
     if(hasMilestone("r",3)) player.m.points = new Decimal(5);
   },
@@ -1134,18 +1137,25 @@ addLayer("c", {
       unlocked(){return hasUpgrade("c",31) && !inChallenge("mr",21)}
     },
   },
+  collapseMax(){
+    let max = 0;
+    max += getBuyableAmount('e',51).toNumber()
+    if(hasUpgrade("c", 91)) max += 1;
+
+    return max;
+  },
   boost(){
     if(inChallenge("mr",21)) return new Decimal(1)
     mult = new Decimal(1)
 
     if(hasUpgrade("s",61)){
-      mult = mult.mul(layers.c.clickables[11].boost().pow(player.c.max))
-      mult = mult.mul(layers.c.clickables[12].boost().pow(player.c.max))
-      mult = mult.mul(layers.c.clickables[21].boost().pow(player.c.max))
-      mult = mult.mul(layers.c.clickables[22].boost().pow(player.c.max))
-      mult = mult.mul(layers.c.clickables[23].boost().pow(player.c.max))
+      mult = mult.mul(layers.c.clickables[11].boost().pow(layers.c.collapseMax()))
+      mult = mult.mul(layers.c.clickables[12].boost().pow(layers.c.collapseMax()))
+      mult = mult.mul(layers.c.clickables[21].boost().pow(layers.c.collapseMax()))
+      mult = mult.mul(layers.c.clickables[22].boost().pow(layers.c.collapseMax()))
+      mult = mult.mul(layers.c.clickables[23].boost().pow(layers.c.collapseMax()))
 
-      mult = mult.pow(new Decimal(0.25).mul(player.c.max).add(1))
+      mult = mult.pow(new Decimal(0.25).mul(layers.c.collapseMax()).add(1))
     } else {
       mult = mult.mul(layers.c.clickables[11].boost().pow(player.c.sacrifices[0]))
       mult = mult.mul(layers.c.clickables[12].boost().pow(player.c.sacrifices[1]))
@@ -1319,7 +1329,6 @@ addLayer("c", {
     91: {
       title: "Increased Collapse I",
       description: "You can put sacrifices twice.",
-      onPurchase(){player.c.max+=1},
       cost: new Decimal(650),
       canAfford(){return hasUpgrade("c",81) && player.c.points.gte(this.cost)},
       unlocked(){return hasUpgrade("c",81) && player.r.points.gte(8)},
@@ -1441,7 +1450,7 @@ addLayer("c", {
       canClick() {return true && !inChallenge("mr",11) && !inChallenge("mr",21)},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[0] <= player.c.max) player.c.sacrifices[0]++;
+        if (player.c.sacrifices[0] <= layers.c.collapseMax()) player.c.sacrifices[0]++;
         else player.c.sacrifices[0] = 0;
       },
       style(){
@@ -1467,7 +1476,7 @@ addLayer("c", {
       canClick() {return player.c.upgrades.length >= 5 && !inChallenge("mr",11) && !inChallenge("mr",21)},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[1] <= player.c.max && player.c.sacrifices[1] < 7) player.c.sacrifices[1]++;
+        if (player.c.sacrifices[1] <= layers.c.collapseMax() && player.c.sacrifices[1] < 7) player.c.sacrifices[1]++;
         else player.c.sacrifices[1] = 0;
       },
       style(){
@@ -1494,7 +1503,7 @@ addLayer("c", {
       canClick() {return player.c.upgrades.length >= 8 && !inChallenge("mr",11) && !inChallenge("mr",21)},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[2] <= player.c.max) player.c.sacrifices[2]++;
+        if (player.c.sacrifices[2] <= layers.c.collapseMax()) player.c.sacrifices[2]++;
         else player.c.sacrifices[2] = 0;
       },
       style(){
@@ -1507,7 +1516,7 @@ addLayer("c", {
       display() {
         if(player.c.upgrades.length < 12)
           return `<h2>Uselessness [4]</h2><br>Unlocked at 12 collapse upgrades (currently: ${player.c.upgrades.length}/12)`
-        if(player.c.max > 0)
+        if(layers.c.collapseMax() > 1)
           return `<h2>Uselessness [4x${player.c.sacrifices[3]}]</h2><br>All P-layer point multipliers will do nothing.<br> Past level 1, this divides your point gain by /10,000 per level.<br>${formatWhole(this.boost())}x collapse points per level`
         return `<h2>Uselessness [4x${player.c.sacrifices[3]}]</h2><br>All P-layer point multipliers will do nothing. (/~5,000 points)<br>${formatWhole(this.boost())}x collapse points per level`
       },
@@ -1522,7 +1531,7 @@ addLayer("c", {
       canClick() {return player.c.upgrades.length >= 12 && !inChallenge("mr",11) && !inChallenge("mr",21)},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[3] <= player.c.max) player.c.sacrifices[3]++;
+        if (player.c.sacrifices[3] <= layers.c.collapseMax()) player.c.sacrifices[3]++;
         else player.c.sacrifices[3] = 0;
       },
       style(){
@@ -1549,7 +1558,7 @@ addLayer("c", {
       canClick() {return player.c.upgrades.length >= 15 && !inChallenge("mr",11) && !inChallenge("mr",21)},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[4] <= player.c.max) player.c.sacrifices[4]++;
+        if (player.c.sacrifices[4] <= layers.c.collapseMax()) player.c.sacrifices[4]++;
         else player.c.sacrifices[4] = 0;
       },
       style(){
@@ -1568,7 +1577,7 @@ addLayer("c", {
       canClick() {return true},
       onClick() {
         doReset("c",true)
-        if (player.c.sacrifices[5] <= player.c.max) player.c.sacrifices[5]++;
+        if (player.c.sacrifices[5] <= layers.c.collapseMax()) player.c.sacrifices[5]++;
         else player.c.sacrifices[5] = 0;
       },
       style(){
@@ -1585,9 +1594,12 @@ addLayer("c", {
     if (layers[resettingLayer].row <= this.row) return;
     let upg = player.c.upgrades;
     layerDataReset(this.layer);
+
+    if(hasMilestone("r",2)) player.c.upgrades.push(42);
+    if(layers[resettingLayer].row >= 26) return;
+    
     if(hasMilestone("mr",4) && layers[resettingLayer].row < 25) player.c.points = new Decimal(1)
     if(hasMilestone("r",7)) player.c.upgrades = upg;
-    else if(hasMilestone("r",2)) player.c.upgrades.push(42);
   },
   
   hotkeys: [
@@ -1793,14 +1805,8 @@ addLayer("e", {
       tooltip: `Increase the collapse sacrifice limit by 1`,
       canAfford() { return player[this.layer].points.gte(this.cost()) },
       buy() {
-        player.c.max+=1
         player[this.layer].points = player[this.layer].points.sub(this.cost())
         setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
-        /*if(hasMilestone("r",5) && this.max(player.e.points).gte(getBuyableAmount(this.layer, this.id))) {
-          let buys = Decimal.min(this.purchaseLimit(),this.max(player.e.points))
-          setBuyableAmount(this.layer, this.id, buys)
-          player.c.max += buys.sub(getBuyableAmount(this.layer, this.id).add(1))
-        }*/
       },
       purchaseLimit(){
         limit = player.r.points.gte(11) ? 3 : 2
@@ -1835,7 +1841,8 @@ addLayer("e", {
 
     layerDataReset(this.layer);
 
-    if(hasMilestone("r",7)){
+    if(layers[resettingLayer].row >= 26) return;
+    if(hasMilestone("r",6)){
       setBuyableAmount("e",41,chargers)
       setBuyableAmount("e",42,chargers2)
     }
@@ -2090,11 +2097,13 @@ addLayer("s", {
     if (layers[resettingLayer].row <= this.row) return;
 
     let upgs = player.s.upgrades
+    let buys = player.s.buyables[11]
 
     layerDataReset(this.layer);
 
     if(hasMilestone("v",0) && layers[resettingLayer].row < 26){
       player.s.upgrades = upgs
+      player.s.buyables[11] = buys
     }
   },
   hotkeys: [
