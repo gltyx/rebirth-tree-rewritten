@@ -148,6 +148,7 @@ addLayer("r", {
     "Mini Rebirths": {
       embedLayer: "mr",
       unlocked(){return player.r.points.gte(11) || hasAchievement("a",112)},
+      buttonStyle: {"border-color":"#A366F2"},
     },
     "Void": {
       embedLayer: "v",
@@ -159,7 +160,7 @@ addLayer("r", {
   layerShown(){return true},
 }) //REBIRTH
 addLayer("mr", {
-  color: "#8F48E8",
+  color: "#A366F2",
   Gcolor: "repeating-linear-gradient(-45deg, #8F48E8, #8F48E8 20px, #883FE2 20px, #883FE2 40px)",
   row: 24,
   
@@ -250,7 +251,7 @@ addLayer("mr", {
         player.mr.upgrades = [];
         player.mr.used = new Decimal(0)
       },
-      canClick() {return player.mr.used.gte(1) && !inChallenge("mr",11) && !inChallenge("mr",12) && !inChallenge("mr",21)},
+      canClick() {return player.mr.upgrades.length >= 1 && !inChallenge("mr",11) && !inChallenge("mr",12) && !inChallenge("mr",21)},
       style: {"width":"300px"},
     }
   },
@@ -353,7 +354,7 @@ addLayer("mr", {
     },
     12: {
       fullDisplay(){
-        return "<big>Nerf Milestone 2's effect by -2</big><br>Cost: -2 Minirebirth essence"
+        return "<big>Nerf Milestone 4's effect by -2</big><br>Cost: -2 Minirebirth essence"
       },
       
       canAfford(){
@@ -363,7 +364,8 @@ addLayer("mr", {
         player.mr.used = player.mr.used.sub(2)
       },
 
-      unlocked(){return player.r.points.gte(12)}
+      unlocked(){return player.r.points.gte(12)},
+      style: {backgroundColor:"#F2669D"}
     },
     21: {
       fullDisplay(){
@@ -582,7 +584,6 @@ addLayer("v", {
 
   layerShown(){return false},
 }) 
-//83
 
 addLayer("a", {
   tabFormat: {

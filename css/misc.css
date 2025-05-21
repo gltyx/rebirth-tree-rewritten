@@ -12,19 +12,19 @@
 .tabButton {
 	background-color: transparent;
 	color: var(--color);
-	font-size: 20px;
+	font-size: 22px;
 	cursor: pointer;
-	padding: 5px 20px;
-	margin: 5px;
-	border-radius: 10px;
-	border: 2px solid;
+	padding: 5px 15px;
+	margin: 4px;
+	border-radius: 8px;
+	border: 3px solid;
 	color: var(--color);
 
 }
 
 .tabButton:hover {
-	transform: scale(1.1, 1.1);
-	text-shadow: 0 0 7px var(--color);
+	transform: scale(1.05, 1.05);
+	text-shadow: 0 0 6px var(--color);
 }
 
 .tooltip { 

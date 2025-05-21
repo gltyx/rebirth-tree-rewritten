@@ -439,8 +439,8 @@ addLayer("p", {
 }) //Prestige
 addLayer("u", {
   symbol: "U",
-  color: "#FFF78E",
-  Gcolor: "repeating-linear-gradient(-45deg, #FFF78E, #FFF78E 20px, #F8F085 20px, #F8F085 40px)",
+  color: "#FFF572",
+  Gcolor: "repeating-linear-gradient(-45deg, #FFF572, #FFF572 20px, #F8F085 20px, #F8F085 40px)",
   row: 1,
   position: 0,
   tooltip(){
@@ -1611,8 +1611,8 @@ addLayer("c", {
 }) //Collapse
 addLayer("e", {
   symbol: "E",
-  color: "#FFBE56",
-  Gcolor: "repeating-linear-gradient(-45deg, #FFBE56, #FFBE56 20px, #F4B34B 20px, #F4B34B 40px)",
+  color: "#FFB756",
+  Gcolor: "repeating-linear-gradient(-45deg, #FFB756, #FFB756 20px, #F4B34B 20px, #F4B34B 40px)",
   row: 2,
   position: 2,
   tooltip(){
